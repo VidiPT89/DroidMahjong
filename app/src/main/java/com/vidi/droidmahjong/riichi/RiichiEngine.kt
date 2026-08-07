@@ -48,7 +48,7 @@ class RiichiSeat(
     var doubleRiichi: Boolean = false
 )
 
-data class Discard(val tile: String, val seat: Int, val calledAway: Boolean = false)
+data class Discard(val tile: String, val seat: Int)
 
 /** Chi options for `seat` on `discardedTile`, as (before, after) pairs still needed from hand. */
 fun chiOptionsFor(hand: List<String>, discardedTile: String): List<List<String>> {
@@ -69,7 +69,6 @@ fun chiOptionsFor(hand: List<String>, discardedTile: String): List<List<String>>
 class RiichiEngine(
     val dealerSeat: Int = 0,
     val roundWind: String = "wE",
-    val isBot: List<Boolean> = listOf(true, true, true, true),
     startingPoints: List<Int> = listOf(25000, 25000, 25000, 25000)
 ) {
     var phase: EnginePhase = EnginePhase.DRAW
@@ -177,12 +176,12 @@ class RiichiEngine(
         val ctx = WinContext(
             hand = seat.hand, melds = seat.melds, drawnTile = turnDrawnTile,
             winType = WinType.TSUMO, doraIndicators = doraIndicators(), uraDora = uraDoraIndicators(),
-            isDealer = currentSeat == dealerSeat, seatWind = seat.wind, roundWind = roundWind
+            isDealer = currentSeat == dealerSeat, seatWind = seat.wind, roundWind = roundWind,
+            riichi = seat.riichi, doubleRiichi = seat.doubleRiichi, ippatsu = seat.ippatsu
         )
         val best = bestYakuResult(win, ctx) ?: return null
         val allTiles = seat.hand + seat.melds.flatMap { it.tiles }
-        val bonusHan = countDora(allTiles) + countUraDora(allTiles, currentSeat) +
-            (if (seat.riichi) 1 else 0) + (if (seat.doubleRiichi) 1 else 0) + (if (seat.ippatsu) 1 else 0)
+        val bonusHan = countDora(allTiles) + countUraDora(allTiles, currentSeat)
         val finalHan = best.han + bonusHan
         val scored = scorePoints(
             ScoreResult(finalHan, best.fu, ScorePayments(), baseScoreFromHanFu(finalHan, best.fu, currentSeat == dealerSeat, WinType.TSUMO)),
@@ -212,12 +211,12 @@ class RiichiEngine(
         val ctx = WinContext(
             hand = hand, melds = seats[seat].melds, drawnTile = discard.tile,
             winType = WinType.RON, doraIndicators = doraIndicators(), uraDora = uraDoraIndicators(),
-            isDealer = seat == dealerSeat, seatWind = seats[seat].wind, roundWind = roundWind
+            isDealer = seat == dealerSeat, seatWind = seats[seat].wind, roundWind = roundWind,
+            riichi = seats[seat].riichi, doubleRiichi = seats[seat].doubleRiichi, ippatsu = seats[seat].ippatsu
         )
         val best = bestYakuResult(win, ctx) ?: return null
         val allTiles = hand + seats[seat].melds.flatMap { it.tiles }
-        val bonusHan = countDora(allTiles) + countUraDora(allTiles, seat) +
-            (if (seats[seat].riichi) 1 else 0) + (if (seats[seat].doubleRiichi) 1 else 0) + (if (seats[seat].ippatsu) 1 else 0)
+        val bonusHan = countDora(allTiles) + countUraDora(allTiles, seat)
         val finalHan = best.han + bonusHan
         val scored = scorePoints(
             ScoreResult(finalHan, best.fu, ScorePayments(), baseScoreFromHanFu(finalHan, best.fu, seat == dealerSeat, WinType.RON)),

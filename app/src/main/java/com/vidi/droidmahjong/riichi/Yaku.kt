@@ -23,7 +23,10 @@ data class WinContext(
     val uraDora: List<String>,
     val isDealer: Boolean,
     val seatWind: String = if (isDealer) "wE" else "wS",
-    val roundWind: String = "wE"
+    val roundWind: String = "wE",
+    val riichi: Boolean = false,
+    val doubleRiichi: Boolean = false,
+    val ippatsu: Boolean = false
 )
 
 fun isYakuhaiTile(tile: String): Boolean = tile.startsWith("d") || tile == "wE" || tile == "wS" || tile == "wW" || tile == "wN"
@@ -44,6 +47,10 @@ fun evaluateKokushi(ctx: WinContext): YakuResult =
 fun evaluateChiitoitsu(ctx: WinContext): YakuResult {
     val entries = mutableListOf(YakuEntry("Chiitoitsu", 2))
     entries += suitPurityYaku(ctx.hand, isOpen = false)
+    if (ctx.doubleRiichi) entries.add(YakuEntry("Double Riichi", 2))
+    else if (ctx.riichi) entries.add(YakuEntry("Riichi", 1))
+    if (ctx.riichi && ctx.ippatsu) entries.add(YakuEntry("Ippatsu", 1))
+    if (ctx.winType == WinType.TSUMO) entries.add(YakuEntry("Menzen Tsumo", 1))
     return entriesToResult(entries, 25, ctx.isDealer, ctx.winType)
 }
 
@@ -81,8 +88,26 @@ fun evaluateDecomposition(decomp: Decomposition, ctx: WinContext): YakuResult? {
     val ankouCount = groups.count { it.kind == "triplet" && it.meld == null }
     if (ankouCount >= 4) entries.add(YakuEntry("Suuankou", 13, isYakuman = true))
 
+    val kanCount = ctx.melds.count { it.kind.endsWith("kan") }
+    if (kanCount >= 4) entries.add(YakuEntry("Suukantsu", 13, isYakuman = true))
+
+    val dragonTripletCount = groups.count { it.kind == "triplet" && it.tiles[0].startsWith("d") }
+    if (dragonTripletCount == 3) entries.add(YakuEntry("Daisangen", 13, isYakuman = true))
+
     if (allGroupTiles.toSet() == GREEN_TILES.intersect(allGroupTiles.toSet()) && allGroupTiles.all { it in GREEN_TILES }) {
         entries.add(YakuEntry("Ryuuiisou", 13, isYakuman = true))
+    }
+
+    // Context yaku (riichi/ippatsu/tsumo) don't apply once a yakuman is already in the
+    // list — a yakuman hand scores on its own, ignoring regular yaku entirely.
+    if (entries.none { it.isYakuman }) {
+        if (ctx.doubleRiichi) entries.add(YakuEntry("Double Riichi", 2))
+        else if (ctx.riichi) entries.add(YakuEntry("Riichi", 1))
+        if (ctx.riichi && ctx.ippatsu) entries.add(YakuEntry("Ippatsu", 1))
+        if (isClosed && ctx.winType == WinType.TSUMO) entries.add(YakuEntry("Menzen Tsumo", 1))
+
+        if (dragonTripletCount == 2 && decomp.head.startsWith("d")) entries.add(YakuEntry("Shousangen", 2))
+        if (isClosed && ankouCount == 3) entries.add(YakuEntry("Sanankou", 2))
     }
 
     // Yakuhai — one han per triplet/kan of a dragon, the round wind, or the seat wind

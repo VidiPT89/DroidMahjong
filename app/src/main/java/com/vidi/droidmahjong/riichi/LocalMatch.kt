@@ -75,7 +75,6 @@ class LocalMatch(val isHuman: List<Boolean>, private val scope: CoroutineScope) 
         val g = RiichiEngine(
             dealerSeat = dealerSeat,
             roundWind = roundWind,
-            isBot = isHuman.map { !it },
             startingPoints = points
         )
         engine = g
