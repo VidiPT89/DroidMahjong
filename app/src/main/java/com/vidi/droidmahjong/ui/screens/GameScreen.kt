@@ -292,22 +292,23 @@ private fun BoardArea(
     onTap: (GameTile) -> Unit
 ) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
+        val extents = remember(engine.difficulty) { BoardExtents(engine.tiles) }
         val containerWidthDp = maxWidth.value
         val containerHeightDp = maxHeight.value
         val scale = minOf(
-            containerWidthDp / BoardGeometry.boardWidth,
-            containerHeightDp / BoardGeometry.boardHeight,
+            containerWidthDp / extents.width,
+            containerHeightDp / extents.height,
             1.5f
         ).coerceAtLeast(0f)
 
-        val offsetX = (containerWidthDp - BoardGeometry.boardWidth * scale) / 2f
-        val offsetY = (containerHeightDp - BoardGeometry.boardHeight * scale) / 2f
+        val offsetX = (containerWidthDp - extents.width * scale) / 2f
+        val offsetY = (containerHeightDp - extents.height * scale) / 2f
 
         // Tiles keep their natural (unscaled) layout size and are visually scaled via
         // graphicsLayer, positioned so their own center lands on the scaled target point —
         // the same "scale + re-center" trick used for the SwiftUI port.
         engine.tiles.filter { !it.removed }.forEach { tile ->
-            val point = BoardGeometry.point(tile)
+            val point = BoardGeometry.point(tile, extents)
             val centerX = offsetX + point.x * scale
             val centerY = offsetY + point.y * scale
             val left = centerX - BoardGeometry.TILE_W / 2

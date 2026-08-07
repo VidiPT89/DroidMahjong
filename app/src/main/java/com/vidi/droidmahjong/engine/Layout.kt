@@ -1,6 +1,8 @@
 package com.vidi.droidmahjong.engine
 
 import com.vidi.droidmahjong.data.BoardPosition
+import com.vidi.droidmahjong.data.buildEasyPairUnits
+import com.vidi.droidmahjong.data.buildShuffledPairUnits
 
 /**
  * Board layout: fixed coordinate table for the 144-tile "Turtle" spread.
@@ -48,3 +50,58 @@ fun buildTurtleLayout(): List<BoardPosition> {
 }
 
 val TURTLE_LAYOUT = buildTurtleLayout()
+
+/** Easy — the base silhouette only, no stacking at all: every tile starts fully visible. */
+fun buildEasyLayout(): List<BoardPosition> {
+    val positions = mutableListOf<BoardPosition>()
+    fun push(x: Int, y: Int, z: Int) { positions.add(BoardPosition(x, y, z)) }
+    val baseRows = listOf(
+        Triple(0, 2, 12), Triple(1, 1, 13), Triple(2, 0, 14), Triple(3, 0, 14),
+        Triple(4, 0, 14), Triple(5, 0, 14), Triple(6, 1, 13), Triple(7, 2, 12)
+    )
+    for ((y, x0, x1) in baseRows) for (x in x0..x1) push(x, y, 0)
+    return positions
+}
+
+val EASY_LAYOUT = buildEasyLayout()
+
+/** Hard — same 144-tile inventory as the Turtle spread, but the peak is spread across 5
+ *  upper layers instead of 4, so more of the board stays covered at any given moment. */
+fun buildHardLayout(): List<BoardPosition> {
+    val positions = mutableListOf<BoardPosition>()
+    fun push(x: Int, y: Int, z: Int) { positions.add(BoardPosition(x, y, z)) }
+
+    val baseRows = listOf(
+        Triple(0, 2, 12), Triple(1, 1, 13), Triple(2, 0, 14), Triple(3, 0, 14),
+        Triple(4, 0, 14), Triple(5, 0, 14), Triple(6, 1, 13), Triple(7, 2, 12)
+    )
+    for ((y, x0, x1) in baseRows) for (x in x0..x1) push(x, y, 0)
+    push(-1, 3, 0); push(-1, 4, 0); push(15, 3, 0); push(15, 4, 0)
+
+    for (y in 2..5) for (x in 6..9) push(x, y, 1)
+    for (y in 3..4) for (x in 6..9) push(x, y, 2)
+    for (y in 3..4) for (x in 7..8) push(x, y, 3)
+    push(7, 3, 4); push(8, 3, 4)
+    push(7, 3, 5); push(8, 3, 5)
+
+    return positions
+}
+
+val HARD_LAYOUT = buildHardLayout()
+
+enum class Difficulty { EASY, MEDIUM, HARD }
+
+val LAYOUTS: Map<Difficulty, List<BoardPosition>> = mapOf(
+    Difficulty.EASY to EASY_LAYOUT,
+    Difficulty.MEDIUM to TURTLE_LAYOUT,
+    Difficulty.HARD to HARD_LAYOUT
+)
+
+val LAYOUT_TILE_COUNT: Map<Difficulty, Int> = LAYOUTS.mapValues { it.value.size }
+
+/** Dispatches to the right pair-unit builder for the board size the difficulty deals. */
+fun buildPairUnitsForDifficulty(difficulty: Difficulty): List<Pair<String, String>> =
+    when (difficulty) {
+        Difficulty.EASY -> buildEasyPairUnits()
+        else -> buildShuffledPairUnits()
+    }

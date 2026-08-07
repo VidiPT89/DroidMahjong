@@ -1,29 +1,42 @@
 package com.vidi.droidmahjong.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vidi.droidmahjong.engine.Difficulty
 import com.vidi.droidmahjong.i18n.Localization
+import com.vidi.droidmahjong.ui.theme.Theme
 
 @Composable
 fun MainMenuScreen(
     loc: Localization,
     hasSave: Boolean,
+    selectedDifficulty: Difficulty,
+    onDifficultyChange: (Difficulty) -> Unit,
     onPlay: () -> Unit,
     onContinue: () -> Unit,
-    onHowToPlay: () -> Unit
+    onHowToPlay: () -> Unit,
+    onTraditionalMode: () -> Unit
 ) {
     Box(Modifier.fillMaxSize()) {
         BackgroundGlow()
@@ -33,13 +46,13 @@ fun MainMenuScreen(
         }
 
         Column(
-            Modifier.fillMaxSize().padding(top = 24.dp),
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = 24.dp, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 loc.t("menuTag"),
-                color = com.vidi.droidmahjong.ui.theme.Theme.accent,
+                color = Theme.accent,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
@@ -49,10 +62,13 @@ fun MainMenuScreen(
             Spacer(Modifier.height(10.dp))
             Text(
                 loc.t("menuSubtitle"),
-                color = com.vidi.droidmahjong.ui.theme.Theme.textDim,
+                color = Theme.textDim,
                 fontSize = 15.sp
             )
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(20.dp))
+
+            DifficultyPicker(loc, selectedDifficulty, onDifficultyChange)
+            Spacer(Modifier.height(20.dp))
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -64,11 +80,52 @@ fun MainMenuScreen(
                 }
                 PrimaryButton(loc.t("play"), onPlay)
                 Spacer(Modifier.height(12.dp))
+                SecondaryButton(loc.t("traditionalMode"), onTraditionalMode)
+                Spacer(Modifier.height(12.dp))
                 GhostButton(loc.t("howToPlay"), onHowToPlay)
             }
 
-            Spacer(Modifier.height(60.dp))
+            Spacer(Modifier.height(40.dp))
             FooterCredits(loc)
+        }
+    }
+}
+
+@Composable
+private fun DifficultyPicker(loc: Localization, selected: Difficulty, onChange: (Difficulty) -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(loc.t("difficultyLabel"), color = Theme.textDim, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+        Spacer(Modifier.height(8.dp))
+        Row(
+            Modifier
+                .background(Theme.bgPanel2, RoundedCornerShape(50))
+                .padding(3.dp)
+        ) {
+            val options = listOf(
+                Difficulty.EASY to loc.t("difficultyEasy"),
+                Difficulty.MEDIUM to loc.t("difficultyMedium"),
+                Difficulty.HARD to loc.t("difficultyHard")
+            )
+            options.forEach { (diff, label) ->
+                val isSelected = diff == selected
+                Box(
+                    Modifier
+                        .background(if (isSelected) Theme.accent else androidx.compose.ui.graphics.Color.Transparent, RoundedCornerShape(50))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = { onChange(diff) }
+                        )
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        label,
+                        color = if (isSelected) Theme.bg else Theme.textDim,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }

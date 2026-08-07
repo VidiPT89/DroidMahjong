@@ -64,6 +64,24 @@ fun tilesMatch(typeIdA: String, typeIdB: String): Boolean {
 }
 
 /**
+ * Builds 54 shuffled pair units (108 tiles) for the Easy layout: 27 of the 34 standard suit/
+ * wind/dragon types, each contributing both of its pairs — no flowers or seasons, keeping the
+ * flat single-layer board simple to read.
+ */
+fun buildEasyPairUnits(): List<Pair<String, String>> {
+    val standardIds = TILE_TYPES
+        .filter { it.category != TileCategory.FLOWER && it.category != TileCategory.SEASON }
+        .map { it.id }
+        .shuffled()
+        .take(27)
+
+    val units = mutableListOf<Pair<String, String>>()
+    for (id in standardIds) { units.add(id to id); units.add(id to id) }
+    units.shuffle()
+    return units.map { if (kotlin.random.Random.nextBoolean()) it.second to it.first else it }
+}
+
+/**
  * Builds 72 shuffled "pair units" (each a matching pair of typeIds) covering all 144 tiles.
  * Consumed by the engine, which assigns each unit to a pair of board positions guaranteed to
  * be simultaneously free at some point during a full solve.

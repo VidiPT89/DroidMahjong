@@ -83,7 +83,9 @@ sealed class SelectResult {
     data class Mismatch(val previous: GameTile, val tile: GameTile) : SelectResult()
 }
 
-class GameEngine {
+class GameEngine(initialDifficulty: Difficulty = Difficulty.MEDIUM) {
+    var difficulty by mutableStateOf(initialDifficulty)
+        private set
     var tiles = mutableStateListOf<GameTile>()
         private set
     var selectedId by mutableStateOf<Int?>(null)
@@ -102,18 +104,19 @@ class GameEngine {
         private set
 
     init {
-        reset()
+        reset(initialDifficulty)
     }
 
-    fun reset() {
+    fun reset(newDifficulty: Difficulty = difficulty) {
+        difficulty = newDifficulty
         tiles.clear()
-        TURTLE_LAYOUT.forEachIndexed { i, pos ->
+        LAYOUTS.getValue(newDifficulty).forEachIndexed { i, pos ->
             tiles.add(GameTile(id = i, x = pos.x, y = pos.y, z = pos.z))
         }
 
         val refPositions = tiles.map { RefPosition(it.id, it.x, it.y, it.z) }
         val pairing = computeSolvablePairingWithRetry(refPositions)
-        val units = buildShuffledPairUnits()
+        val units = buildPairUnitsForDifficulty(newDifficulty)
 
         pairing.forEachIndexed { idx, (a, b) ->
             val (typeA, typeB) = units[idx]
@@ -271,10 +274,12 @@ class GameEngine {
         historyPairs = history.map { listOf(it.first, it.second) },
         moves = moves,
         hintsUsed = hintsUsed,
-        elapsedSeconds = elapsedSeconds()
+        elapsedSeconds = elapsedSeconds(),
+        difficulty = difficulty.name
     )
 
     fun restore(snapshot: GameSnapshot) {
+        difficulty = Difficulty.entries.firstOrNull { it.name == snapshot.difficulty } ?: Difficulty.MEDIUM
         tiles.clear()
         tiles.addAll(snapshot.tiles)
         selectedId = snapshot.selectedId
@@ -292,5 +297,6 @@ data class GameSnapshot(
     val historyPairs: List<List<Int>>,
     val moves: Int,
     val hintsUsed: Int,
-    val elapsedSeconds: Long
+    val elapsedSeconds: Long,
+    val difficulty: String = Difficulty.MEDIUM.name
 )

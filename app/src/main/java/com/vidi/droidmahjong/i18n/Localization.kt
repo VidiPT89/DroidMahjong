@@ -34,6 +34,11 @@ class Localization(private val context: Context) {
                 "howToPlay" to "Como Jogar",
                 "continueGame" to "Continuar Jogo",
 
+                "difficultyLabel" to "DIFICULDADE",
+                "difficultyEasy" to "Fácil",
+                "difficultyMedium" to "Médio",
+                "difficultyHard" to "Difícil",
+
                 "back" to "Voltar",
                 "time" to "Tempo",
                 "moves" to "Jogadas",
@@ -76,7 +81,32 @@ class Localization(private val context: Context) {
                 "htpHintBody" to "realça um par jogável no tabuleiro. Tens um número limitado por jogo.",
                 "htpShuffleBody" to "reorganiza as fichas restantes, mantendo sempre uma solução possível, caso fiques sem jogadas.",
                 "htpUndoBody" to "repõe o último par removido.",
-                "htpCloseButton" to "Entendido"
+                "htpCloseButton" to "Entendido",
+
+                "traditionalMode" to "4 Jogadores (Riichi)",
+                "playLocal" to "Jogar Localmente",
+                "tradSetupTitle" to "4 JOGADORES — RIICHI",
+                "tradSetupSubtitle" to "Escolhe quantos lugares são humanos — os restantes são preenchidos por bots.",
+                "humanPlayers" to "Jogadores humanos",
+                "startMatch" to "Começar Partida",
+                "windE" to "Este", "windS" to "Sul", "windW" to "Oeste", "windN" to "Norte",
+                "you" to "Tu", "bot" to "Bot",
+                "wallLeft" to "Parede",
+                "roundLabel" to "Ronda", "handLabel" to "Mão",
+                "doraLabel" to "Dora", "pointsLabel" to "Pontos",
+                "riichiBtn" to "Riichi", "tsumoBtn" to "Tsumo", "ronBtn" to "Ron",
+                "ponBtn" to "Pon", "chiBtn" to "Chi", "kanBtn" to "Kan", "passBtn" to "Passar",
+                "waitingOthers" to "A aguardar os outros jogadores…",
+                "yourTurnDiscard" to "A tua vez — toca numa ficha para descartar.",
+                "tsumoWinTitle" to "Tsumo!", "ronWinTitle" to "Ron!",
+                "exhaustiveDrawTitle" to "Parede Esgotada",
+                "tenpaiLabel" to "Em Tenpai", "notenLabel" to "Sem Tenpai",
+                "yakuLabel" to "Yaku", "hanLabel" to "Han", "fuLabel" to "Fu",
+                "totalPoints" to "Total",
+                "nextHand" to "Próxima Mão",
+                "matchEndTitle" to "Fim de Jogo",
+                "finalStandings" to "Classificação final",
+                "riichiSticksLabel" to "Palitos de riichi na mesa"
             ),
             Lang.EN to mapOf(
                 "tapToContinue" to "Tap to continue",
@@ -87,6 +117,11 @@ class Localization(private val context: Context) {
                 "play" to "Play",
                 "howToPlay" to "How to Play",
                 "continueGame" to "Continue Game",
+
+                "difficultyLabel" to "DIFFICULTY",
+                "difficultyEasy" to "Easy",
+                "difficultyMedium" to "Medium",
+                "difficultyHard" to "Hard",
 
                 "back" to "Back",
                 "time" to "Time",
@@ -130,7 +165,32 @@ class Localization(private val context: Context) {
                 "htpHintBody" to "highlights one playable pair on the board. You get a limited number per game.",
                 "htpShuffleBody" to "rearranges the remaining tiles while always keeping a possible solution, in case you run out of moves.",
                 "htpUndoBody" to "brings back the last pair you removed.",
-                "htpCloseButton" to "Got it"
+                "htpCloseButton" to "Got it",
+
+                "traditionalMode" to "4-Player (Riichi)",
+                "playLocal" to "Play Locally",
+                "tradSetupTitle" to "4-PLAYER — RIICHI",
+                "tradSetupSubtitle" to "Choose how many seats are human — the rest are filled by bots.",
+                "humanPlayers" to "Human players",
+                "startMatch" to "Start Match",
+                "windE" to "East", "windS" to "South", "windW" to "West", "windN" to "North",
+                "you" to "You", "bot" to "Bot",
+                "wallLeft" to "Wall",
+                "roundLabel" to "Round", "handLabel" to "Hand",
+                "doraLabel" to "Dora", "pointsLabel" to "Points",
+                "riichiBtn" to "Riichi", "tsumoBtn" to "Tsumo", "ronBtn" to "Ron",
+                "ponBtn" to "Pon", "chiBtn" to "Chi", "kanBtn" to "Kan", "passBtn" to "Pass",
+                "waitingOthers" to "Waiting for other players…",
+                "yourTurnDiscard" to "Your turn — tap a tile to discard.",
+                "tsumoWinTitle" to "Tsumo!", "ronWinTitle" to "Ron!",
+                "exhaustiveDrawTitle" to "Wall Exhausted",
+                "tenpaiLabel" to "Tenpai", "notenLabel" to "Noten",
+                "yakuLabel" to "Yaku", "hanLabel" to "Han", "fuLabel" to "Fu",
+                "totalPoints" to "Total",
+                "nextHand" to "Next Hand",
+                "matchEndTitle" to "Match Over",
+                "finalStandings" to "Final standings",
+                "riichiSticksLabel" to "Riichi sticks on the table"
             )
         )
     }

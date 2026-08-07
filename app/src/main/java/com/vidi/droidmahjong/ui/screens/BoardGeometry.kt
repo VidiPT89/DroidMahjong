@@ -2,7 +2,19 @@ package com.vidi.droidmahjong.ui.screens
 
 import androidx.compose.ui.geometry.Offset
 import com.vidi.droidmahjong.data.GameTile
-import com.vidi.droidmahjong.engine.TURTLE_LAYOUT
+
+/** Board extents computed from whichever tile set is actually on screen — Easy/Medium/Hard
+ *  layouts each have different min/max/z bounds, so this can't be a fixed global. */
+class BoardExtents(tiles: List<GameTile>) {
+    val minX = tiles.minOfOrNull { it.x } ?: 0
+    val maxX = tiles.maxOfOrNull { it.x } ?: 0
+    val minY = tiles.minOfOrNull { it.y } ?: 0
+    val maxY = tiles.maxOfOrNull { it.y } ?: 0
+    val maxZ = tiles.maxOfOrNull { it.z } ?: 0
+
+    val width = (maxX - minX + 1) * BoardGeometry.STEP_X + BoardGeometry.TILE_W + maxZ * BoardGeometry.LAYER_NUDGE * 2
+    val height = (maxY - minY + 1) * BoardGeometry.STEP_Y + BoardGeometry.TILE_H + maxZ * BoardGeometry.LAYER_NUDGE * 2
+}
 
 object BoardGeometry {
     const val TILE_W = 44f
@@ -10,20 +22,12 @@ object BoardGeometry {
     val STEP_X = TILE_W * 0.86f
     val STEP_Y = TILE_H * 0.82f
     const val LAYER_NUDGE = 5f
-    const val MAX_LAYER = 4f
 
-    val minX = TURTLE_LAYOUT.minOf { it.x }
-    val maxX = TURTLE_LAYOUT.maxOf { it.x }
-    val minY = TURTLE_LAYOUT.minOf { it.y }
-    val maxY = TURTLE_LAYOUT.maxOf { it.y }
-
-    val boardWidth = (maxX - minX + 1) * STEP_X + TILE_W + MAX_LAYER * LAYER_NUDGE * 2
-    val boardHeight = (maxY - minY + 1) * STEP_Y + TILE_H + MAX_LAYER * LAYER_NUDGE * 2
-
-    fun point(tile: GameTile): Offset {
+    fun point(tile: GameTile, extents: BoardExtents): Offset {
         val nudge = tile.z * LAYER_NUDGE
-        val x = (tile.x - minX) * STEP_X + TILE_W / 2 + (MAX_LAYER * LAYER_NUDGE - nudge)
-        val y = (tile.y - minY) * STEP_Y + TILE_H / 2 + (MAX_LAYER * LAYER_NUDGE - nudge)
+        val maxNudge = extents.maxZ * LAYER_NUDGE
+        val x = (tile.x - extents.minX) * STEP_X + TILE_W / 2 + (maxNudge - nudge)
+        val y = (tile.y - extents.minY) * STEP_Y + TILE_H / 2 + (maxNudge - nudge)
         return Offset(x, y)
     }
 

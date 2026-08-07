@@ -32,6 +32,7 @@ object SaveStore {
         json.put("moves", snapshot.moves)
         json.put("hintsUsed", snapshot.hintsUsed)
         json.put("elapsedSeconds", snapshot.elapsedSeconds)
+        json.put("difficulty", snapshot.difficulty)
 
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             .putString(KEY_SAVE, json.toString())
@@ -62,7 +63,8 @@ object SaveStore {
                 historyPairs = history,
                 moves = json.getInt("moves"),
                 hintsUsed = json.getInt("hintsUsed"),
-                elapsedSeconds = json.getLong("elapsedSeconds")
+                elapsedSeconds = json.getLong("elapsedSeconds"),
+                difficulty = json.optString("difficulty", Difficulty.MEDIUM.name)
             )
         } catch (e: Exception) {
             null
