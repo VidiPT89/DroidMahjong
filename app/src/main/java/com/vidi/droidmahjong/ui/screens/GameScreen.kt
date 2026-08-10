@@ -148,7 +148,7 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
     }
 
     val currentScore = run {
-        val pairsCleared = (144 - engine.remaining()) / 2
+        val pairsCleared = (engine.tiles.size - engine.remaining()) / 2
         (pairsCleared * 100 - engine.hintsUsed * 30).coerceAtLeast(0)
     }
 
