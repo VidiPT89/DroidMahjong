@@ -63,6 +63,21 @@ private const val MAX_HINTS = 5
 
 private enum class ModalKind { NONE, WIN, STUCK, CONFIRM_RESTART }
 
+/** Deals tiles from the center of the board outward, so the pyramid visibly builds up from
+ *  the middle rather than from a random order. */
+private fun assignDealOrder(engine: GameEngine, dealOrder: MutableMap<Int, Long>) {
+    val extents = BoardExtents(engine.tiles)
+    val centerX = (extents.minX + extents.maxX) / 2.0
+    val centerY = (extents.minY + extents.maxY) / 2.0
+
+    val sorted = engine.tiles.sortedBy { tile ->
+        val dx = tile.x - centerX
+        val dy = tile.y - centerY
+        dx * dx + dy * dy
+    }
+    sorted.forEachIndexed { i, tile -> dealOrder[tile.id] = (i * 6).toLong() }
+}
+
 @Composable
 fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
     val context = LocalContext.current
@@ -84,8 +99,7 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
     }
 
     LaunchedEffect(Unit) {
-        val shuffled = engine.tiles.shuffled()
-        shuffled.forEachIndexed { i, tile -> dealOrder[tile.id] = (i * 6).toLong() }
+        assignDealOrder(engine, dealOrder)
         while (true) {
             delay(1000)
             elapsedTick++
@@ -160,9 +174,8 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
     fun restartGame() {
         engine.reset()
         SaveStore.clear(context)
-        val shuffled = engine.tiles.shuffled()
         dealOrder.clear()
-        shuffled.forEachIndexed { i, tile -> dealOrder[tile.id] = (i * 6).toLong() }
+        assignDealOrder(engine, dealOrder)
         recordOutcome = null
         modal = ModalKind.NONE
     }
