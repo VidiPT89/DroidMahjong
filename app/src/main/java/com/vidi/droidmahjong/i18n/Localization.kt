@@ -65,6 +65,12 @@ class Localization(private val context: Context) {
                 "noMoreUndo" to "Não há jogadas para desfazer.",
                 "shuffleImpossible" to "Não foi possível encontrar um baralhar resolúvel. Tenta desfazer.",
 
+                "leaderboardTitle" to "MELHOR RESULTADO NESTA DIFICULDADE",
+                "bestTime" to "Melhor tempo",
+                "bestMoves" to "Menos jogadas",
+                "newRecordTime" to "🏆 Novo recorde de tempo",
+                "newRecordMoves" to "🏆 Novo recorde de jogadas",
+
                 "htpTitle" to "Como Jogar",
                 "htpIntro" to "O Mahjong Solitário joga-se com 144 fichas empilhadas em pirâmide. O objetivo é remover todas as fichas do tabuleiro, combinando-as duas a duas.",
                 "htpFreeTitle" to "1. A regra da ficha \"livre\"",
@@ -148,6 +154,12 @@ class Localization(private val context: Context) {
                 "noHintsLeft" to "No more hints available this game.",
                 "noMoreUndo" to "Nothing to undo.",
                 "shuffleImpossible" to "Couldn't find a solvable shuffle. Try undo instead.",
+
+                "leaderboardTitle" to "BEST RESULT ON THIS DIFFICULTY",
+                "bestTime" to "Best time",
+                "bestMoves" to "Fewest moves",
+                "newRecordTime" to "🏆 New time record",
+                "newRecordMoves" to "🏆 New moves record",
 
                 "htpTitle" to "How to Play",
                 "htpIntro" to "Mahjong Solitaire is played with 144 tiles stacked into a pyramid. The goal is to clear the whole board by matching tiles two at a time.",

@@ -20,6 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vidi.droidmahjong.engine.LeaderboardEntry
+import com.vidi.droidmahjong.engine.RecordOutcome
 import com.vidi.droidmahjong.i18n.Localization
 import com.vidi.droidmahjong.ui.theme.Theme
 
@@ -45,7 +47,17 @@ private fun ModalScaffold(content: @Composable androidx.compose.foundation.layou
 }
 
 @Composable
-fun WinModal(loc: Localization, time: String, moves: Int, score: Int, onPlayAgain: () -> Unit, onMenu: () -> Unit) {
+fun WinModal(
+    loc: Localization,
+    time: String,
+    moves: Int,
+    score: Int,
+    onPlayAgain: () -> Unit,
+    onMenu: () -> Unit,
+    leaderboard: LeaderboardEntry? = null,
+    recordOutcome: RecordOutcome? = null,
+    formattedBestTime: (Long) -> String = { "%02d:%02d".format(it / 60, it % 60) }
+) {
     ModalScaffold {
         Text("🎉", fontSize = 40.sp)
         Spacer12()
@@ -58,10 +70,55 @@ fun WinModal(loc: Localization, time: String, moves: Int, score: Int, onPlayAgai
             StatBlock(loc.t("finalMoves"), "$moves")
             StatBlock(loc.t("finalScore"), "$score")
         }
+        if (leaderboard != null && (leaderboard.bestTimeSeconds != null || leaderboard.bestMoves != null)) {
+            Spacer12()
+            LeaderboardBlock(loc, leaderboard, recordOutcome, formattedBestTime)
+        }
         Spacer12()
         PrimaryButton(loc.t("playAgain"), onPlayAgain)
         Spacer8()
         GhostButton(loc.t("backToMenu"), onMenu)
+    }
+}
+
+/** Local best-time / fewest-moves leaderboard block for the current difficulty, shown after a
+ *  win. Data comes from [com.vidi.droidmahjong.engine.LeaderboardStore] (on-device only). */
+@Composable
+private fun LeaderboardBlock(
+    loc: Localization,
+    leaderboard: LeaderboardEntry,
+    recordOutcome: RecordOutcome?,
+    formattedBestTime: (Long) -> String
+) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(Theme.bgPanel2, RoundedCornerShape(12.dp))
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            loc.t("leaderboardTitle"),
+            color = Theme.accent,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
+        )
+        Spacer8()
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly) {
+            leaderboard.bestTimeSeconds?.let {
+                StatBlock(
+                    if (recordOutcome?.isNewBestTime == true) loc.t("newRecordTime") else loc.t("bestTime"),
+                    formattedBestTime(it)
+                )
+            }
+            leaderboard.bestMoves?.let {
+                StatBlock(
+                    if (recordOutcome?.isNewBestMoves == true) loc.t("newRecordMoves") else loc.t("bestMoves"),
+                    "$it"
+                )
+            }
+        }
     }
 }
 

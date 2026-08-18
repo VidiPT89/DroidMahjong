@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -46,10 +47,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.vidi.droidmahjong.data.GameTile
+import com.vidi.droidmahjong.engine.Difficulty
 import com.vidi.droidmahjong.engine.GameEngine
+import com.vidi.droidmahjong.engine.LeaderboardStore
+import com.vidi.droidmahjong.engine.RecordOutcome
 import com.vidi.droidmahjong.engine.SaveStore
 import com.vidi.droidmahjong.engine.SelectResult
 import com.vidi.droidmahjong.i18n.Localization
+import com.vidi.droidmahjong.ui.sound.SoundFx
 import com.vidi.droidmahjong.ui.theme.Theme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -69,6 +74,14 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
     val shakeTokens = remember { mutableStateMapOf<Int, Int>() }
     val dealOrder = remember { mutableStateMapOf<Int, Long>() }
     var elapsedTick by remember { mutableIntStateOf(0) }
+    var recordOutcome by remember { mutableStateOf<RecordOutcome?>(null) }
+
+    // See ui/sound/SoundFx.kt — placeholder ToneGenerator-based feedback, no custom audio
+    // assets exist in this repo yet.
+    val soundFx = remember { SoundFx() }
+    DisposableEffect(Unit) {
+        onDispose { soundFx.release() }
+    }
 
     LaunchedEffect(Unit) {
         val shuffled = engine.tiles.shuffled()
@@ -93,17 +106,23 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
 
     fun handleTap(tile: GameTile) {
         when (val result = engine.select(tile.id)) {
+            is SelectResult.Selected -> soundFx.tilePick()
             is SelectResult.Matched -> {
+                soundFx.tileMatch()
                 SaveStore.save(context, engine)
                 if (result.won) {
+                    soundFx.win()
                     SaveStore.clear(context)
+                    recordOutcome = LeaderboardStore.recordResult(
+                        context, engine.difficulty, engine.elapsedSeconds(), engine.moves
+                    )
                     scope.launch { delay(300); modal = ModalKind.WIN }
                 } else if (engine.isStuck()) {
                     scope.launch { delay(200); modal = ModalKind.STUCK }
                 }
             }
-            is SelectResult.Mismatch -> triggerShake(result.previous.id)
-            is SelectResult.Blocked -> triggerShake(result.tile.id)
+            is SelectResult.Mismatch -> { soundFx.tileMismatch(); triggerShake(result.previous.id) }
+            is SelectResult.Blocked -> { soundFx.tileMismatch(); triggerShake(result.tile.id) }
             else -> {}
         }
     }
@@ -144,6 +163,7 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
         val shuffled = engine.tiles.shuffled()
         dealOrder.clear()
         shuffled.forEachIndexed { i, tile -> dealOrder[tile.id] = (i * 6).toLong() }
+        recordOutcome = null
         modal = ModalKind.NONE
     }
 
@@ -186,6 +206,9 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
                 time = formattedTime(engine.elapsedSeconds()),
                 moves = engine.moves,
                 score = currentScore,
+                leaderboard = LeaderboardStore.get(context, engine.difficulty),
+                recordOutcome = recordOutcome,
+                formattedBestTime = { formattedTime(it) },
                 onPlayAgain = { restartGame() },
                 onMenu = { SaveStore.clear(context); onExit() }
             )
