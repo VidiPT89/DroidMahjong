@@ -107,33 +107,19 @@ fun HowToPlayScreen(loc: Localization, onClose: () -> Unit) {
                 ToolRow(loc.t("hint"), loc.t("htpHintBody"))
                 ToolRow(loc.t("shuffle"), loc.t("htpShuffleBody"))
                 ToolRow(loc.t("undo"), loc.t("htpUndoBody"))
+
+                HtpSection(loc.t("htpScoreTitle"), loc.t("htpScoreBody"))
             } else {
                 Text(loc.t("htpRiichiIntro"), color = Theme.textDim, fontSize = 15.sp)
 
-                Spacer(Modifier.height(26.dp))
-                Text(loc.t("htpRiichiTurnTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text(loc.t("htpRiichiTurnBody"), color = Theme.textDim, fontSize = 14.sp)
-
-                Spacer(Modifier.height(26.dp))
-                Text(loc.t("htpRiichiHandTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text(loc.t("htpRiichiHandBody"), color = Theme.textDim, fontSize = 14.sp)
-
-                Spacer(Modifier.height(26.dp))
-                Text(loc.t("htpRiichiCallsTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text(loc.t("htpRiichiCallsBody"), color = Theme.textDim, fontSize = 14.sp)
-
-                Spacer(Modifier.height(26.dp))
-                Text(loc.t("htpRiichiDeclareTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text(loc.t("htpRiichiDeclareBody"), color = Theme.textDim, fontSize = 14.sp)
-
-                Spacer(Modifier.height(26.dp))
-                Text(loc.t("htpRiichiScoringTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text(loc.t("htpRiichiScoringBody"), color = Theme.textDim, fontSize = 14.sp)
+                HtpSection(loc.t("htpRiichiTableTitle"), loc.t("htpRiichiTableBody"))
+                HtpSection(loc.t("htpRiichiTurnTitle"), loc.t("htpRiichiTurnBody"))
+                HtpSection(loc.t("htpRiichiHandTitle"), loc.t("htpRiichiHandBody"))
+                HtpSection(loc.t("htpRiichiCallsTitle"), loc.t("htpRiichiCallsBody"))
+                HtpSection(loc.t("htpRiichiDeclareTitle"), loc.t("htpRiichiDeclareBody"))
+                HtpSection(loc.t("htpRiichiDoraTitle"), loc.t("htpRiichiDoraBody"))
+                HtpSection(loc.t("htpRiichiScoringTitle"), loc.t("htpRiichiScoringBody"))
+                HtpSection(loc.t("htpRiichiEndTitle"), loc.t("htpRiichiEndBody"))
             }
             Spacer(Modifier.height(90.dp))
         }
@@ -142,6 +128,14 @@ fun HowToPlayScreen(loc: Localization, onClose: () -> Unit) {
             PrimaryButton(loc.t("htpCloseButton"), onClose)
         }
     }
+}
+
+@Composable
+private fun HtpSection(title: String, body: String) {
+    Spacer(Modifier.height(26.dp))
+    Text(title, color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    Spacer(Modifier.height(8.dp))
+    Text(body, color = Theme.textDim, fontSize = 14.sp)
 }
 
 @Composable

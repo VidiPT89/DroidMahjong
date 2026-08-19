@@ -59,8 +59,6 @@ import com.vidi.droidmahjong.ui.theme.Theme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private const val MAX_HINTS = 5
-
 private enum class ModalKind { NONE, WIN, STUCK, CONFIRM_RESTART }
 
 /** Deals tiles from the center of the board outward, so the pyramid visibly builds up from
@@ -142,10 +140,6 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
     }
 
     fun performHint() {
-        if (engine.hintsUsed >= MAX_HINTS) {
-            showToast(loc.t("noHintsLeft"))
-            return
-        }
         val pair = engine.findHint() ?: return
         engine.useHint()
         hintedIds = setOf(pair.first.id, pair.second.id)
@@ -264,7 +258,7 @@ private fun GameHeader(
                 Icon(Icons.Default.ArrowBack, contentDescription = loc.t("back"), tint = Theme.text, modifier = Modifier.size(16.dp))
             }
             Spacer(Modifier.weight(1f))
-            HeaderActionIcon(Icons.Default.Lightbulb, loc.t("hint"), MAX_HINTS - engine.hintsUsed, onHint)
+            HeaderActionIcon(Icons.Default.Lightbulb, loc.t("hint"), null, onHint)
             Spacer(Modifier.width(6.dp))
             HeaderActionIcon(Icons.Default.Shuffle, loc.t("shuffle"), null, onShuffle)
             Spacer(Modifier.width(6.dp))
