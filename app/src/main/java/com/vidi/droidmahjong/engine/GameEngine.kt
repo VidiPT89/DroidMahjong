@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.vidi.droidmahjong.data.GameTile
+import com.vidi.droidmahjong.data.buildInfinitePairUnits
 import com.vidi.droidmahjong.data.buildPairUnitsFromInventory
 import com.vidi.droidmahjong.data.buildShuffledPairUnits
 import com.vidi.droidmahjong.data.tilesMatch
@@ -98,6 +99,11 @@ class GameEngine(initialDifficulty: Difficulty = Difficulty.MEDIUM) {
     var startedAtMillis: Long = System.currentTimeMillis()
         private set
 
+    /** Only meaningful for [Difficulty.INFINITE]: the level currently being played, driving
+     *  the board size via [buildInfiniteLayout]. Ignored for the fixed difficulties. */
+    var level by mutableStateOf(1)
+        private set
+
     /** The construction-time pairing order used to guarantee solvability — kept for
      *  solvability testing, not used by normal gameplay. */
     var provenSolveOrder: List<Pair<Int, Int>> = emptyList()
@@ -109,14 +115,16 @@ class GameEngine(initialDifficulty: Difficulty = Difficulty.MEDIUM) {
 
     fun reset(newDifficulty: Difficulty = difficulty) {
         difficulty = newDifficulty
+        level = 1
+        val layout = if (newDifficulty == Difficulty.INFINITE) buildInfiniteLayout(1) else LAYOUTS.getValue(newDifficulty)
         tiles.clear()
-        LAYOUTS.getValue(newDifficulty).forEachIndexed { i, pos ->
+        layout.forEachIndexed { i, pos ->
             tiles.add(GameTile(id = i, x = pos.x, y = pos.y, z = pos.z))
         }
 
         val refPositions = tiles.map { RefPosition(it.id, it.x, it.y, it.z) }
         val pairing = computeSolvablePairingWithRetry(refPositions)
-        val units = buildPairUnitsForDifficulty(newDifficulty)
+        val units = if (newDifficulty == Difficulty.INFINITE) buildInfinitePairUnits(tiles.size) else buildPairUnitsForDifficulty(newDifficulty)
 
         pairing.forEachIndexed { idx, (a, b) ->
             val (typeA, typeB) = units[idx]
@@ -130,6 +138,35 @@ class GameEngine(initialDifficulty: Difficulty = Difficulty.MEDIUM) {
         moves = 0
         hintsUsed = 0
         startedAtMillis = System.currentTimeMillis()
+    }
+
+    /**
+     * Infinite mode only: deals the next (bigger) level's board in place, keeping the run's
+     * cumulative moves/score/timer going rather than resetting them like [reset] does for a
+     * brand new game. The undo history does reset — undoing across a level boundary back
+     * into an already-cleared board doesn't make sense.
+     */
+    fun dealNextInfiniteLevel() {
+        level += 1
+        val layout = buildInfiniteLayout(level)
+        tiles.clear()
+        layout.forEachIndexed { i, pos ->
+            tiles.add(GameTile(id = i, x = pos.x, y = pos.y, z = pos.z))
+        }
+
+        val refPositions = tiles.map { RefPosition(it.id, it.x, it.y, it.z) }
+        val pairing = computeSolvablePairingWithRetry(refPositions)
+        val units = buildInfinitePairUnits(tiles.size)
+
+        pairing.forEachIndexed { idx, (a, b) ->
+            val (typeA, typeB) = units[idx]
+            setTypeId(a, typeA)
+            setTypeId(b, typeB)
+        }
+        provenSolveOrder = pairing
+
+        selectedId = null
+        history = mutableListOf()
     }
 
     private fun setTypeId(id: Int, typeId: String) {
@@ -275,11 +312,13 @@ class GameEngine(initialDifficulty: Difficulty = Difficulty.MEDIUM) {
         moves = moves,
         hintsUsed = hintsUsed,
         elapsedSeconds = elapsedSeconds(),
-        difficulty = difficulty.name
+        difficulty = difficulty.name,
+        level = level
     )
 
     fun restore(snapshot: GameSnapshot) {
         difficulty = Difficulty.entries.firstOrNull { it.name == snapshot.difficulty } ?: Difficulty.MEDIUM
+        level = snapshot.level
         tiles.clear()
         tiles.addAll(snapshot.tiles)
         selectedId = snapshot.selectedId
@@ -298,5 +337,6 @@ data class GameSnapshot(
     val moves: Int,
     val hintsUsed: Int,
     val elapsedSeconds: Long,
-    val difficulty: String = Difficulty.MEDIUM.name
+    val difficulty: String = Difficulty.MEDIUM.name,
+    val level: Int = 1
 )

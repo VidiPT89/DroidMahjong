@@ -20,10 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vidi.droidmahjong.engine.Difficulty
+import com.vidi.droidmahjong.engine.LeaderboardStore
 import com.vidi.droidmahjong.i18n.Localization
 import com.vidi.droidmahjong.ui.theme.Theme
 
@@ -104,7 +106,8 @@ private fun DifficultyPicker(loc: Localization, selected: Difficulty, onChange: 
             val options = listOf(
                 Difficulty.EASY to loc.t("difficultyEasy"),
                 Difficulty.MEDIUM to loc.t("difficultyMedium"),
-                Difficulty.HARD to loc.t("difficultyHard")
+                Difficulty.HARD to loc.t("difficultyHard"),
+                Difficulty.INFINITE to loc.t("difficultyInfinite")
             )
             options.forEach { (diff, label) ->
                 val isSelected = diff == selected
@@ -116,16 +119,25 @@ private fun DifficultyPicker(loc: Localization, selected: Difficulty, onChange: 
                             indication = null,
                             onClick = { onChange(diff) }
                         )
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(
                         label,
                         color = if (isSelected) Theme.bg else Theme.textDim,
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
             }
+        }
+        val bestLevel = LeaderboardStore.getInfiniteBestLevel(LocalContext.current)
+        if (bestLevel > 0) {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                loc.t("infiniteBestLabel").replace("{level}", "$bestLevel"),
+                color = Theme.textFaint,
+                fontSize = 11.sp
+            )
         }
     }
 }

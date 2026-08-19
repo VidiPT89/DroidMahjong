@@ -89,7 +89,41 @@ fun buildHardLayout(): List<BoardPosition> {
 
 val HARD_LAYOUT = buildHardLayout()
 
-enum class Difficulty { EASY, MEDIUM, HARD }
+/**
+ * Procedural layout for the "Infinite" mode: a flat base rectangle that grows wider and
+ * taller every couple of levels, with a shrinking stack of centered layers on top whose
+ * count also grows with the level. Base width/height are always kept even, so every layer's
+ * area stays even too, meaning the board never needs an odd tile discarded to stay pairable.
+ *
+ * Layers always shrink by 2 in each dimension and stop at 2x2 (same "never a lone unpaired
+ * tile at the peak" rule as the hand-authored layouts above), so this feeds the exact same
+ * computeSolvablePairingWithRetry() used everywhere else without any special-casing.
+ */
+fun buildInfiniteLayout(level: Int): List<BoardPosition> {
+    val positions = mutableListOf<BoardPosition>()
+    fun push(x: Int, y: Int, z: Int) { positions.add(BoardPosition(x, y, z)) }
+
+    val baseW = 10 + 2 * ((level - 1) / 2)
+    val baseH = 6 + 2 * ((level - 1) / 3)
+    for (y in 0 until baseH) for (x in 0 until baseW) push(x, y, 0)
+
+    val maxLayers = 1 + level / 2
+    var w = baseW - 4
+    var h = baseH - 2
+    var z = 1
+    while (w >= 2 && h >= 2 && z <= maxLayers) {
+        val xOff = (baseW - w) / 2
+        val yOff = (baseH - h) / 2
+        for (yy in 0 until h) for (xx in 0 until w) push(xOff + xx, yOff + yy, z)
+        w -= 2
+        h -= 2
+        z++
+    }
+
+    return positions
+}
+
+enum class Difficulty { EASY, MEDIUM, HARD, INFINITE }
 
 val LAYOUTS: Map<Difficulty, List<BoardPosition>> = mapOf(
     Difficulty.EASY to EASY_LAYOUT,

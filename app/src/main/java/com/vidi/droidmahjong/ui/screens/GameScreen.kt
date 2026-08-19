@@ -123,12 +123,16 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
                 soundFx.tileMatch()
                 SaveStore.save(context, engine)
                 if (result.won) {
-                    soundFx.win()
-                    SaveStore.clear(context)
-                    recordOutcome = LeaderboardStore.recordResult(
-                        context, engine.difficulty, engine.elapsedSeconds(), engine.moves
-                    )
-                    scope.launch { delay(300); modal = ModalKind.WIN }
+                    if (engine.difficulty == Difficulty.INFINITE) {
+                        onInfiniteLevelCleared()
+                    } else {
+                        soundFx.win()
+                        SaveStore.clear(context)
+                        recordOutcome = LeaderboardStore.recordResult(
+                            context, engine.difficulty, engine.elapsedSeconds(), engine.moves
+                        )
+                        scope.launch { delay(300); modal = ModalKind.WIN }
+                    }
                 } else if (engine.isStuck()) {
                     scope.launch { delay(200); modal = ModalKind.STUCK }
                 }
@@ -136,6 +140,28 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
             is SelectResult.Mismatch -> { soundFx.tileMismatch(); triggerShake(result.previous.id) }
             is SelectResult.Blocked -> { soundFx.tileMismatch(); triggerShake(result.tile.id) }
             else -> {}
+        }
+    }
+
+    /**
+     * Infinite mode never shows the win modal — clearing a level just chains straight into
+     * the next (bigger) one, so the run keeps going instead of stopping. Progress (the
+     * highest level reached) is saved after every level, not just when the player eventually
+     * quits, so it survives the process being killed mid-run.
+     */
+    fun onInfiniteLevelCleared() {
+        val clearedLevel = engine.level
+        val isNewRecord = LeaderboardStore.recordInfiniteLevel(context, clearedLevel)
+        soundFx.win()
+        showToast(
+            (if (isNewRecord) loc.t("newRecordLevel") else loc.t("levelCleared")).replace("{level}", "$clearedLevel")
+        )
+        scope.launch {
+            delay(900)
+            engine.dealNextInfiniteLevel()
+            dealOrder.clear()
+            assignDealOrder(engine, dealOrder)
+            SaveStore.save(context, engine)
         }
     }
 
@@ -267,6 +293,10 @@ private fun GameHeader(
             HeaderActionIcon(Icons.Default.Refresh, loc.t("restart"), null, onRestart)
         }
         Row(Modifier.fillMaxWidth().padding(bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (engine.difficulty == Difficulty.INFINITE) {
+                StatGroup(loc.t("level"), "${engine.level}", Modifier.weight(1f))
+                StatDivider()
+            }
             val timeText = remember(elapsedTick) { formattedTime(engine.elapsedSeconds()) }
             StatGroup(loc.t("time"), timeText, Modifier.weight(1f))
             StatDivider()
@@ -322,7 +352,10 @@ private fun BoardArea(
     onTap: (GameTile) -> Unit
 ) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        val extents = remember(engine.difficulty) { BoardExtents(engine.tiles) }
+        // Keyed on level too, not just difficulty: Infinite mode keeps the same difficulty
+        // across an entire run while the board itself grows every level, so extents would
+        // otherwise stay stale (sized for level 1) after dealNextInfiniteLevel().
+        val extents = remember(engine.difficulty, engine.level) { BoardExtents(engine.tiles) }
         val containerWidthDp = maxWidth.value
         val containerHeightDp = maxHeight.value
         val scale = minOf(

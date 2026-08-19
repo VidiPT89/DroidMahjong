@@ -47,6 +47,22 @@ object LeaderboardStore {
 
     fun getAll(context: Context): Map<Difficulty, LeaderboardEntry> =
         Difficulty.entries.associateWith { get(context, it) }
+
+    private const val INFINITE_BEST_LEVEL_KEY = "leaderboard_infinite_bestLevel"
+
+    /** Infinite mode has no fixed board to compare times/moves against (it grows every
+     *  level), so its only record is the highest level ever reached. */
+    fun getInfiniteBestLevel(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        return prefs.getInt(INFINITE_BEST_LEVEL_KEY, 0)
+    }
+
+    fun recordInfiniteLevel(context: Context, level: Int): Boolean {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val isNewRecord = level > getInfiniteBestLevel(context)
+        if (isNewRecord) prefs.edit().putInt(INFINITE_BEST_LEVEL_KEY, level).apply()
+        return isNewRecord
+    }
 }
 
 data class RecordOutcome(val isNewBestTime: Boolean, val isNewBestMoves: Boolean) {

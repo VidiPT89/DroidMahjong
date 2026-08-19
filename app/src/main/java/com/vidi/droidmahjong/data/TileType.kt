@@ -136,3 +136,19 @@ fun buildPairUnitsFromInventory(typeCounts: Map<String, Int>): List<Pair<String,
     units.shuffle()
     return units.map { if (kotlin.random.Random.nextBoolean()) it.second to it.first else it }
 }
+
+/**
+ * Infinite mode's pool: unlike the fixed difficulties (which deal from one real 144-tile
+ * set), the board can grow past 144 tiles, so this just cycles through the 34 non-bonus
+ * types as many times as needed to produce exactly `pairsNeeded` pairs — there's no "only 4
+ * copies of each tile" constraint to honor here, it's an extended variant, not a real set.
+ */
+fun buildInfinitePairUnits(totalTiles: Int): List<Pair<String, String>> {
+    val pairsNeeded = totalTiles / 2
+    val types = TILE_TYPES
+        .filter { it.category != TileCategory.FLOWER && it.category != TileCategory.SEASON }
+        .map { it.id }
+    val units = (0 until pairsNeeded).map { val id = types[it % types.size]; id to id }.toMutableList()
+    units.shuffle()
+    return units.map { if (kotlin.random.Random.nextBoolean()) it.second to it.first else it }
+}

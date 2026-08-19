@@ -109,6 +109,7 @@ fun HowToPlayScreen(loc: Localization, onClose: () -> Unit) {
                 ToolRow(loc.t("undo"), loc.t("htpUndoBody"))
 
                 HtpSection(loc.t("htpScoreTitle"), loc.t("htpScoreBody"))
+                HtpSection(loc.t("htpInfiniteTitle"), loc.t("htpInfiniteBody"))
             } else {
                 Text(loc.t("htpRiichiIntro"), color = Theme.textDim, fontSize = 15.sp)
 
