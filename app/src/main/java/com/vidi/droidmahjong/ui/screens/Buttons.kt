@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -59,10 +59,13 @@ fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modi
 
 @Composable
 fun GhostButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    TextButton(
+    OutlinedButton(
         onClick = onClick,
         modifier = modifier.widthIn(max = 340.dp).fillMaxWidth(),
-        colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = Theme.textDim)
+        shape = RoundedCornerShape(10.dp),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = Theme.textDim),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Theme.borderStrong),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 14.dp)
     ) {
         Text(text, fontSize = 15.sp, fontWeight = FontWeight.Medium)
     }

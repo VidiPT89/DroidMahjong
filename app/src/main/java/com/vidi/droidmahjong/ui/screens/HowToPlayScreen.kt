@@ -19,10 +19,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +38,8 @@ import com.vidi.droidmahjong.ui.theme.Theme
 
 @Composable
 fun HowToPlayScreen(loc: Localization, onClose: () -> Unit) {
+    var riichiTab by remember { mutableStateOf(false) }
+
     Column(Modifier.fillMaxSize().background(Theme.bg)) {
         Row(
             Modifier.fillMaxWidth().padding(16.dp),
@@ -47,58 +54,118 @@ fun HowToPlayScreen(loc: Localization, onClose: () -> Unit) {
             Box(Modifier.size(36.dp))
         }
 
+        Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            HtpTab(loc.t("htpModeSolitaire"), selected = !riichiTab, modifier = Modifier.weight(1f)) { riichiTab = false }
+            HtpTab(loc.t("htpModeRiichi"), selected = riichiTab, modifier = Modifier.weight(1f)) { riichiTab = true }
+        }
+
         Column(
             Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp)
         ) {
-            Text(loc.t("htpIntro"), color = Theme.textDim, fontSize = 15.sp)
-            Spacer(Modifier.height(26.dp))
+            if (!riichiTab) {
+                Text(loc.t("htpIntro"), color = Theme.textDim, fontSize = 15.sp)
+                Spacer(Modifier.height(26.dp))
 
-            Text(loc.t("htpFreeTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(8.dp))
-            Text(loc.t("htpFreeBody"), color = Theme.textDim, fontSize = 14.sp)
-            Spacer(Modifier.height(16.dp))
+                Text(loc.t("htpFreeTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                Text(loc.t("htpFreeBody"), color = Theme.textDim, fontSize = 14.sp)
+                Spacer(Modifier.height(16.dp))
 
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                HtpExample(loc.t("htpCoveredLabel"), loc.t("htpCoveredDesc")) {
-                    Box(Modifier.size(50.dp, 60.dp), contentAlignment = Alignment.Center) {
-                        MiniTile(Modifier.offset(y = 6.dp))
-                        MiniTile(Modifier.offset(y = (-6).dp), width = 28.dp, height = 40.dp)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    HtpExample(loc.t("htpCoveredLabel"), loc.t("htpCoveredDesc")) {
+                        Box(Modifier.size(50.dp, 60.dp), contentAlignment = Alignment.Center) {
+                            MiniTile(Modifier.offset(y = 6.dp))
+                            MiniTile(Modifier.offset(y = (-6).dp), width = 28.dp, height = 40.dp)
+                        }
+                    }
+                    HtpExample(loc.t("htpBlockedLabel"), loc.t("htpBlockedDesc")) {
+                        Row {
+                            MiniTile(width = 26.dp, height = 40.dp)
+                            MiniTile(width = 26.dp, height = 40.dp, modifier = Modifier.offset(x = (-4).dp))
+                            MiniTile(width = 26.dp, height = 40.dp, modifier = Modifier.offset(x = (-8).dp))
+                        }
+                    }
+                    HtpExample(loc.t("htpFreeLabel"), loc.t("htpFreeDesc")) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            MiniTile(width = 28.dp, height = 40.dp, highlighted = true)
+                            MiniTile(width = 26.dp, height = 40.dp)
+                        }
                     }
                 }
-                HtpExample(loc.t("htpBlockedLabel"), loc.t("htpBlockedDesc")) {
-                    Row {
-                        MiniTile(width = 26.dp, height = 40.dp)
-                        MiniTile(width = 26.dp, height = 40.dp, modifier = Modifier.offset(x = (-4).dp))
-                        MiniTile(width = 26.dp, height = 40.dp, modifier = Modifier.offset(x = (-8).dp))
-                    }
-                }
-                HtpExample(loc.t("htpFreeLabel"), loc.t("htpFreeDesc")) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        MiniTile(width = 28.dp, height = 40.dp, highlighted = true)
-                        MiniTile(width = 26.dp, height = 40.dp)
-                    }
-                }
+
+                Spacer(Modifier.height(26.dp))
+                Text(loc.t("htpMatchTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                Text(loc.t("htpMatchBody"), color = Theme.textDim, fontSize = 14.sp)
+
+                Spacer(Modifier.height(26.dp))
+                Text(loc.t("htpToolsTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(10.dp))
+                ToolRow(loc.t("hint"), loc.t("htpHintBody"))
+                ToolRow(loc.t("shuffle"), loc.t("htpShuffleBody"))
+                ToolRow(loc.t("undo"), loc.t("htpUndoBody"))
+            } else {
+                Text(loc.t("htpRiichiIntro"), color = Theme.textDim, fontSize = 15.sp)
+
+                Spacer(Modifier.height(26.dp))
+                Text(loc.t("htpRiichiTurnTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                Text(loc.t("htpRiichiTurnBody"), color = Theme.textDim, fontSize = 14.sp)
+
+                Spacer(Modifier.height(26.dp))
+                Text(loc.t("htpRiichiHandTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                Text(loc.t("htpRiichiHandBody"), color = Theme.textDim, fontSize = 14.sp)
+
+                Spacer(Modifier.height(26.dp))
+                Text(loc.t("htpRiichiCallsTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                Text(loc.t("htpRiichiCallsBody"), color = Theme.textDim, fontSize = 14.sp)
+
+                Spacer(Modifier.height(26.dp))
+                Text(loc.t("htpRiichiDeclareTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                Text(loc.t("htpRiichiDeclareBody"), color = Theme.textDim, fontSize = 14.sp)
+
+                Spacer(Modifier.height(26.dp))
+                Text(loc.t("htpRiichiScoringTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                Text(loc.t("htpRiichiScoringBody"), color = Theme.textDim, fontSize = 14.sp)
             }
-
-            Spacer(Modifier.height(26.dp))
-            Text(loc.t("htpMatchTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(8.dp))
-            Text(loc.t("htpMatchBody"), color = Theme.textDim, fontSize = 14.sp)
-
-            Spacer(Modifier.height(26.dp))
-            Text(loc.t("htpToolsTitle"), color = Theme.accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(10.dp))
-            ToolRow(loc.t("hint"), loc.t("htpHintBody"))
-            ToolRow(loc.t("shuffle"), loc.t("htpShuffleBody"))
-            ToolRow(loc.t("undo"), loc.t("htpUndoBody"))
             Spacer(Modifier.height(90.dp))
         }
 
         Box(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
             PrimaryButton(loc.t("htpCloseButton"), onClose)
+        }
+    }
+}
+
+@Composable
+private fun HtpTab(label: String, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Box(
+        modifier
+            .padding(vertical = 10.dp)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                label,
+                color = if (selected) Theme.accent else Theme.textDim,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(6.dp))
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .background(if (selected) Theme.accent else androidx.compose.ui.graphics.Color.Transparent)
+            )
         }
     }
 }
