@@ -140,7 +140,23 @@ class Localization(private val context: Context) {
                 "nextHand" to "Próxima Mão",
                 "matchEndTitle" to "Fim de Jogo",
                 "finalStandings" to "Classificação final",
-                "riichiSticksLabel" to "Palitos de riichi na mesa"
+                "riichiSticksLabel" to "Palitos de riichi na mesa",
+                "playOnline" to "Jogar Online",
+                "onlineIntro" to "Cria uma sala e partilha o código, ou entra numa sala existente.",
+                "serverUrlLabel" to "Endereço do servidor",
+                "createRoom" to "Criar Sala",
+                "joinRoom" to "Entrar em Sala",
+                "roomCodePlaceholder" to "ex: A7K2P",
+                "yourRoomCode" to "Código da tua sala",
+                "startOnlineMatch" to "Começar Partida",
+                "connecting" to "A ligar…",
+                "connectionError" to "Não foi possível ligar ao servidor. Verifica o endereço.",
+                "roomNotFound" to "Sala não encontrada.",
+                "roomFull" to "Sala cheia ou já começou.",
+                "playerConnected" to "ligado",
+                "playerWaiting" to "a aguardar",
+                "onlineSeatFillNote" to "Lugares vazios são preenchidos por bots ao começar.",
+                "connectionLost" to "Ligação ao servidor perdida."
             ),
             Lang.EN to mapOf(
                 "tapToContinue" to "Tap to continue",
@@ -258,7 +274,23 @@ class Localization(private val context: Context) {
                 "nextHand" to "Next Hand",
                 "matchEndTitle" to "Match Over",
                 "finalStandings" to "Final standings",
-                "riichiSticksLabel" to "Riichi sticks on the table"
+                "riichiSticksLabel" to "Riichi sticks on the table",
+                "playOnline" to "Play Online",
+                "onlineIntro" to "Create a room and share the code, or join an existing room.",
+                "serverUrlLabel" to "Server address",
+                "createRoom" to "Create Room",
+                "joinRoom" to "Join Room",
+                "roomCodePlaceholder" to "e.g. A7K2P",
+                "yourRoomCode" to "Your room code",
+                "startOnlineMatch" to "Start Match",
+                "connecting" to "Connecting…",
+                "connectionError" to "Couldn't connect to the server. Check the address.",
+                "roomNotFound" to "Room not found.",
+                "roomFull" to "Room full or already started.",
+                "playerConnected" to "connected",
+                "playerWaiting" to "waiting",
+                "onlineSeatFillNote" to "Empty seats are filled with bots once the match starts.",
+                "connectionLost" to "Connection to server lost."
             )
         )
     }

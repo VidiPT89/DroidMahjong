@@ -22,7 +22,8 @@ import com.vidi.droidmahjong.ui.theme.Theme
 fun TraditionalModeSelectScreen(
     loc: Localization,
     onBack: () -> Unit,
-    onLocal: () -> Unit
+    onLocal: () -> Unit,
+    onOnline: () -> Unit
 ) {
     Box(Modifier.fillMaxSize()) {
         BackgroundGlow()
@@ -60,6 +61,8 @@ fun TraditionalModeSelectScreen(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
             ) {
                 PrimaryButton(loc.t("playLocal"), onLocal)
+                Spacer(Modifier.height(12.dp))
+                SecondaryButton(loc.t("playOnline"), onOnline)
                 Spacer(Modifier.height(12.dp))
                 GhostButton(loc.t("back"), onBack)
             }

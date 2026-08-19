@@ -49,8 +49,13 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     testImplementation("junit:junit:4.13.2")
+    // Plain unit tests (app/src/test) run on the JVM against Android SDK *stub* jars, where
+    // org.json.* throws "Stub!" at runtime -- this real implementation shadows that stub on
+    // the unit test classpath so OnlineClientJsonTest can actually exercise JSON parsing.
+    testImplementation("org.json:json:20231013")
 }

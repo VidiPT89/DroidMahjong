@@ -17,18 +17,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.vidi.droidmahjong.engine.Difficulty
 import com.vidi.droidmahjong.engine.GameEngine
+import com.vidi.droidmahjong.engine.OnlineClient
 import com.vidi.droidmahjong.engine.SaveStore
 import com.vidi.droidmahjong.i18n.Localization
 import com.vidi.droidmahjong.riichi.LocalMatch
 import com.vidi.droidmahjong.ui.screens.GameScreen
 import com.vidi.droidmahjong.ui.screens.HowToPlayScreen
 import com.vidi.droidmahjong.ui.screens.MainMenuScreen
+import com.vidi.droidmahjong.ui.screens.OnlineLobbyScreen
+import com.vidi.droidmahjong.ui.screens.OnlineTableScreen
 import com.vidi.droidmahjong.ui.screens.SplashScreen
 import com.vidi.droidmahjong.ui.screens.TraditionalModeSelectScreen
 import com.vidi.droidmahjong.ui.screens.TraditionalSetupScreen
 import com.vidi.droidmahjong.ui.screens.TraditionalTableScreen
 
-private enum class AppScreen { SPLASH, MENU, HOW_TO_PLAY, GAME, TRAD_MODE_SELECT, TRAD_SETUP, TRAD_TABLE }
+private enum class AppScreen { SPLASH, MENU, HOW_TO_PLAY, GAME, TRAD_MODE_SELECT, TRAD_SETUP, TRAD_TABLE, ONLINE_LOBBY, ONLINE_TABLE }
 
 private const val PREFS = "droidmahjong-prefs"
 private const val KEY_DIFFICULTY = "difficulty"
@@ -65,6 +68,7 @@ private fun RootApp() {
     var hasSave by remember { mutableStateOf(SaveStore.hasSave(context)) }
     var humanSeats by remember { mutableStateOf(listOf(true, false, false, false)) }
     var localMatch by remember { mutableStateOf<LocalMatch?>(null) }
+    val onlineClient = remember { OnlineClient(context) }
 
     Box(Modifier.fillMaxSize().safeDrawingPadding()) {
         when (screen) {
@@ -107,7 +111,8 @@ private fun RootApp() {
             AppScreen.TRAD_MODE_SELECT -> TraditionalModeSelectScreen(
                 loc = loc,
                 onBack = { screen = AppScreen.MENU },
-                onLocal = { screen = AppScreen.TRAD_SETUP }
+                onLocal = { screen = AppScreen.TRAD_SETUP },
+                onOnline = { screen = AppScreen.ONLINE_LOBBY }
             )
             AppScreen.TRAD_SETUP -> TraditionalSetupScreen(
                 loc = loc,
@@ -132,6 +137,23 @@ private fun RootApp() {
                     }
                 )
             }
+            AppScreen.ONLINE_LOBBY -> OnlineLobbyScreen(
+                loc = loc,
+                client = onlineClient,
+                onBack = {
+                    onlineClient.disconnect()
+                    screen = AppScreen.TRAD_MODE_SELECT
+                },
+                onStarted = { screen = AppScreen.ONLINE_TABLE }
+            )
+            AppScreen.ONLINE_TABLE -> OnlineTableScreen(
+                loc = loc,
+                client = onlineClient,
+                onExit = {
+                    onlineClient.disconnect()
+                    screen = AppScreen.TRAD_MODE_SELECT
+                }
+            )
         }
     }
 }
