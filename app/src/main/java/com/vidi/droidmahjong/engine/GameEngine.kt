@@ -229,6 +229,40 @@ class GameEngine(initialDifficulty: Difficulty = Difficulty.MEDIUM) {
 
     fun freeTiles(): List<GameTile> = active().filter { isFree(it) }
 
+    /**
+     * Same result as calling [isFree] once per tile, but O(active tiles) total instead of
+     * O(n²) — [isCovered]/[isOpenLeft]/[isOpenRight] each linear-scan the whole board, which
+     * is fine for a single lookup (a tap, a hint) but far too slow to call once per rendered
+     * tile every time the board recomposes: this was the actual source of the tap/match "lag"
+     * reported on the SwiftUI port for the same reason, and the render loop here calls
+     * [isFree] once per tile too (see BoardArea in GameScreen.kt). Used by the render loop;
+     * the per-tile methods above stay as the simple reference implementation for one-off
+     * queries elsewhere (select, findHint, isStuck).
+     */
+    fun freeTileIds(): Set<Int> {
+        data class Cell(val x: Int, val y: Int, val z: Int)
+        data class Column(val x: Int, val y: Int)
+
+        val activeTiles = active()
+        val occupied = HashSet<Cell>(activeTiles.size * 2)
+        val maxZInColumn = HashMap<Column, Int>()
+        for (t in activeTiles) {
+            occupied.add(Cell(t.x, t.y, t.z))
+            val col = Column(t.x, t.y)
+            maxZInColumn[col] = maxOf(maxZInColumn[col] ?: t.z, t.z)
+        }
+
+        val result = HashSet<Int>()
+        for (t in activeTiles) {
+            val covered = (maxZInColumn[Column(t.x, t.y)] ?: t.z) > t.z
+            if (covered) continue
+            val openLeft = !occupied.contains(Cell(t.x - 1, t.y, t.z))
+            val openRight = !occupied.contains(Cell(t.x + 1, t.y, t.z))
+            if (openLeft || openRight) result.add(t.id)
+        }
+        return result
+    }
+
     /** Attempts to select a tile; returns what happened so the UI can animate/react. */
     fun select(id: Int): SelectResult {
         val tile = getTile(id) ?: return SelectResult.Ignored

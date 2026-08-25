@@ -366,6 +366,10 @@ private fun BoardArea(
         // across an entire run while the board itself grows every level, so extents would
         // otherwise stay stale (sized for level 1) after dealNextInfiniteLevel().
         val extents = remember(engine.difficulty, engine.level) { BoardExtents(engine.tiles) }
+        // Computed once per recomposition, not once per tile -- see freeTileIds()'s doc
+        // comment for why calling engine.isFree(tile) inside the forEach below was a real
+        // source of lag: it turned every recomposition into an O(n²) scan.
+        val freeIds = engine.freeTileIds()
         val containerWidthDp = maxWidth.value
         val containerHeightDp = maxHeight.value
         val scale = minOf(
@@ -396,7 +400,7 @@ private fun BoardArea(
             ) {
                 TileView(
                     tile = tile,
-                    isFree = engine.isFree(tile),
+                    isFree = freeIds.contains(tile.id),
                     isSelected = engine.selectedId == tile.id,
                     isHinted = hintedIds.contains(tile.id),
                     shakeToken = shakeTokens[tile.id] ?: 0,
