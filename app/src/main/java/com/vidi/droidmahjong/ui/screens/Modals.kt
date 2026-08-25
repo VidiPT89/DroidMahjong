@@ -56,14 +56,15 @@ fun WinModal(
     onMenu: () -> Unit,
     leaderboard: LeaderboardEntry? = null,
     recordOutcome: RecordOutcome? = null,
-    formattedBestTime: (Long) -> String = { "%02d:%02d".format(it / 60, it % 60) }
+    formattedBestTime: (Long) -> String = { "%02d:%02d".format(it / 60, it % 60) },
+    subtitle: String? = null
 ) {
     ModalScaffold {
         Text("🎉", fontSize = 40.sp)
         Spacer12()
         Text(loc.t("winTitle"), color = Theme.text, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         Spacer8()
-        Text(loc.t("winSubtitle"), color = Theme.textDim, fontSize = 14.sp, textAlign = TextAlign.Center)
+        Text(subtitle ?: loc.t("winSubtitle"), color = Theme.textDim, fontSize = 14.sp, textAlign = TextAlign.Center)
         Spacer12()
         Row(Modifier.fillMaxWidth(), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly) {
             StatBlock(loc.t("finalTime"), time)

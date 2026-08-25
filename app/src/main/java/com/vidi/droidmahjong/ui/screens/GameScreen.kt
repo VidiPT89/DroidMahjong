@@ -49,6 +49,7 @@ import androidx.compose.ui.zIndex
 import com.vidi.droidmahjong.data.GameTile
 import com.vidi.droidmahjong.engine.Difficulty
 import com.vidi.droidmahjong.engine.GameEngine
+import com.vidi.droidmahjong.engine.LEVELS_MAX_LEVEL
 import com.vidi.droidmahjong.engine.LeaderboardStore
 import com.vidi.droidmahjong.engine.RecordOutcome
 import com.vidi.droidmahjong.engine.SaveStore
@@ -116,6 +117,36 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
         shakeTokens[id] = (shakeTokens[id] ?: 0) + 1
     }
 
+    /**
+     * Levels mode shows the win modal only once the whole ladder (LEVELS_MAX_LEVEL) is
+     * cleared — before that, clearing a level just chains straight into the next (bigger)
+     * one, so a run keeps going instead of stopping at every step. Progress (the highest
+     * level reached) is saved after every level, not just when the player eventually quits,
+     * so it survives the process being killed mid-run.
+     */
+    fun onInfiniteLevelCleared() {
+        val clearedLevel = engine.level
+        val isNewRecord = LeaderboardStore.recordInfiniteLevel(context, clearedLevel)
+        soundFx.win()
+
+        if (clearedLevel >= LEVELS_MAX_LEVEL) {
+            SaveStore.clear(context)
+            scope.launch { delay(300); modal = ModalKind.WIN }
+            return
+        }
+
+        showToast(
+            (if (isNewRecord) loc.t("newRecordLevel") else loc.t("levelCleared")).replace("{level}", "$clearedLevel")
+        )
+        scope.launch {
+            delay(900)
+            engine.dealNextInfiniteLevel()
+            dealOrder.clear()
+            assignDealOrder(engine, dealOrder)
+            SaveStore.save(context, engine)
+        }
+    }
+
     fun handleTap(tile: GameTile) {
         when (val result = engine.select(tile.id)) {
             is SelectResult.Selected -> soundFx.tilePick()
@@ -140,28 +171,6 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
             is SelectResult.Mismatch -> { soundFx.tileMismatch(); triggerShake(result.previous.id) }
             is SelectResult.Blocked -> { soundFx.tileMismatch(); triggerShake(result.tile.id) }
             else -> {}
-        }
-    }
-
-    /**
-     * Infinite mode never shows the win modal — clearing a level just chains straight into
-     * the next (bigger) one, so the run keeps going instead of stopping. Progress (the
-     * highest level reached) is saved after every level, not just when the player eventually
-     * quits, so it survives the process being killed mid-run.
-     */
-    fun onInfiniteLevelCleared() {
-        val clearedLevel = engine.level
-        val isNewRecord = LeaderboardStore.recordInfiniteLevel(context, clearedLevel)
-        soundFx.win()
-        showToast(
-            (if (isNewRecord) loc.t("newRecordLevel") else loc.t("levelCleared")).replace("{level}", "$clearedLevel")
-        )
-        scope.launch {
-            delay(900)
-            engine.dealNextInfiniteLevel()
-            dealOrder.clear()
-            assignDealOrder(engine, dealOrder)
-            SaveStore.save(context, engine)
         }
     }
 
@@ -242,6 +251,7 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
                 leaderboard = LeaderboardStore.get(context, engine.difficulty),
                 recordOutcome = recordOutcome,
                 formattedBestTime = { formattedTime(it) },
+                subtitle = if (engine.difficulty == Difficulty.INFINITE) loc.t("allLevelsComplete") else null,
                 onPlayAgain = { restartGame() },
                 onMenu = { SaveStore.clear(context); onExit() }
             )
@@ -249,7 +259,7 @@ fun GameScreen(engine: GameEngine, loc: Localization, onExit: () -> Unit) {
                 loc = loc,
                 onShuffle = { performShuffle(); modal = ModalKind.NONE },
                 onUndo = { performUndo(); modal = ModalKind.NONE },
-                onMenu = onExit
+                onMenu = { SaveStore.clear(context); onExit() }
             )
             ModalKind.CONFIRM_RESTART -> ConfirmModal(
                 message = loc.t("restartConfirm"),

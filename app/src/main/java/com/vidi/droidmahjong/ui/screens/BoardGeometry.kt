@@ -12,8 +12,13 @@ class BoardExtents(tiles: List<GameTile>) {
     val maxY = tiles.maxOfOrNull { it.y } ?: 0
     val maxZ = tiles.maxOfOrNull { it.z } ?: 0
 
-    val width = (maxX - minX + 1) * BoardGeometry.STEP_X + BoardGeometry.TILE_W + maxZ * BoardGeometry.LAYER_NUDGE * 2
-    val height = (maxY - minY + 1) * BoardGeometry.STEP_Y + BoardGeometry.TILE_H + maxZ * BoardGeometry.LAYER_NUDGE * 2
+    // Must match the span point() actually produces -- an extra `+1` row/column here (beyond
+    // what point() places tiles across) would pad only the trailing edge, since point()
+    // anchors its leftmost/topmost content at exactly maxZ * LAYER_NUDGE with no matching
+    // margin reserved on the near side, making the board visibly lean toward the top-left
+    // inside its own frame.
+    val width = (maxX - minX) * BoardGeometry.STEP_X + BoardGeometry.TILE_W + maxZ * BoardGeometry.LAYER_NUDGE * 2
+    val height = (maxY - minY) * BoardGeometry.STEP_Y + BoardGeometry.TILE_H + maxZ * BoardGeometry.LAYER_NUDGE * 2
 }
 
 object BoardGeometry {

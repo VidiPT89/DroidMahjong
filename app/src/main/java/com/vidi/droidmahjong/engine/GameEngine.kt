@@ -141,10 +141,42 @@ class GameEngine(initialDifficulty: Difficulty = Difficulty.MEDIUM) {
     }
 
     /**
-     * Infinite mode only: deals the next (bigger) level's board in place, keeping the run's
+     * Levels mode only: starts play directly at a chosen level (used by level select), rather
+     * than always beginning at level 1 like [reset] does.
+     */
+    fun startLevel(startAt: Int) {
+        difficulty = Difficulty.INFINITE
+        level = startAt
+        val layout = buildInfiniteLayout(level)
+        tiles.clear()
+        layout.forEachIndexed { i, pos ->
+            tiles.add(GameTile(id = i, x = pos.x, y = pos.y, z = pos.z))
+        }
+
+        val refPositions = tiles.map { RefPosition(it.id, it.x, it.y, it.z) }
+        val pairing = computeSolvablePairingWithRetry(refPositions)
+        val units = buildInfinitePairUnits(tiles.size)
+
+        pairing.forEachIndexed { idx, (a, b) ->
+            val (typeA, typeB) = units[idx]
+            setTypeId(a, typeA)
+            setTypeId(b, typeB)
+        }
+        provenSolveOrder = pairing
+
+        selectedId = null
+        history = mutableListOf()
+        moves = 0
+        hintsUsed = 0
+        startedAtMillis = System.currentTimeMillis()
+    }
+
+    /**
+     * Levels mode only: deals the next (bigger) level's board in place, keeping the run's
      * cumulative moves/score/timer going rather than resetting them like [reset] does for a
      * brand new game. The undo history does reset — undoing across a level boundary back
-     * into an already-cleared board doesn't make sense.
+     * into an already-cleared board doesn't make sense. Never called past LEVELS_MAX_LEVEL —
+     * clearing the last level ends the run instead (see GameScreen level-cleared handling).
      */
     fun dealNextInfiniteLevel() {
         level += 1

@@ -23,6 +23,7 @@ import com.vidi.droidmahjong.i18n.Localization
 import com.vidi.droidmahjong.riichi.LocalMatch
 import com.vidi.droidmahjong.ui.screens.GameScreen
 import com.vidi.droidmahjong.ui.screens.HowToPlayScreen
+import com.vidi.droidmahjong.ui.screens.LevelSelectScreen
 import com.vidi.droidmahjong.ui.screens.MainMenuScreen
 import com.vidi.droidmahjong.ui.screens.OnlineLobbyScreen
 import com.vidi.droidmahjong.ui.screens.OnlineTableScreen
@@ -31,7 +32,7 @@ import com.vidi.droidmahjong.ui.screens.TraditionalModeSelectScreen
 import com.vidi.droidmahjong.ui.screens.TraditionalSetupScreen
 import com.vidi.droidmahjong.ui.screens.TraditionalTableScreen
 
-private enum class AppScreen { SPLASH, MENU, HOW_TO_PLAY, GAME, TRAD_MODE_SELECT, TRAD_SETUP, TRAD_TABLE, ONLINE_LOBBY, ONLINE_TABLE }
+private enum class AppScreen { SPLASH, MENU, HOW_TO_PLAY, GAME, LEVEL_SELECT, TRAD_MODE_SELECT, TRAD_SETUP, TRAD_TABLE, ONLINE_LOBBY, ONLINE_TABLE }
 
 private const val PREFS = "droidmahjong-prefs"
 private const val KEY_DIFFICULTY = "difficulty"
@@ -94,12 +95,23 @@ private fun RootApp() {
                     if (snapshot != null) engine.restore(snapshot) else engine.reset(difficulty)
                     screen = AppScreen.GAME
                 },
+                onLevels = { screen = AppScreen.LEVEL_SELECT },
                 onHowToPlay = { screen = AppScreen.HOW_TO_PLAY },
                 onTraditionalMode = { screen = AppScreen.TRAD_MODE_SELECT }
             )
             AppScreen.HOW_TO_PLAY -> HowToPlayScreen(loc) {
                 screen = AppScreen.MENU
             }
+            AppScreen.LEVEL_SELECT -> LevelSelectScreen(
+                loc = loc,
+                onBack = { screen = AppScreen.MENU },
+                onSelectLevel = { level ->
+                    engine.startLevel(level)
+                    SaveStore.clear(context)
+                    hasSave = false
+                    screen = AppScreen.GAME
+                }
+            )
             AppScreen.GAME -> GameScreen(
                 engine = engine,
                 loc = loc,

@@ -20,12 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vidi.droidmahjong.engine.Difficulty
-import com.vidi.droidmahjong.engine.LeaderboardStore
 import com.vidi.droidmahjong.i18n.Localization
 import com.vidi.droidmahjong.ui.theme.Theme
 
@@ -37,6 +35,7 @@ fun MainMenuScreen(
     onDifficultyChange: (Difficulty) -> Unit,
     onPlay: () -> Unit,
     onContinue: () -> Unit,
+    onLevels: () -> Unit,
     onHowToPlay: () -> Unit,
     onTraditionalMode: () -> Unit
 ) {
@@ -82,6 +81,8 @@ fun MainMenuScreen(
                 }
                 PrimaryButton(loc.t("play"), onPlay)
                 Spacer(Modifier.height(12.dp))
+                SecondaryButton(loc.t("levelsMode"), onLevels)
+                Spacer(Modifier.height(12.dp))
                 SecondaryButton(loc.t("traditionalMode"), onTraditionalMode)
                 Spacer(Modifier.height(12.dp))
                 GhostButton(loc.t("howToPlay"), onHowToPlay)
@@ -106,8 +107,7 @@ private fun DifficultyPicker(loc: Localization, selected: Difficulty, onChange: 
             val options = listOf(
                 Difficulty.EASY to loc.t("difficultyEasy"),
                 Difficulty.MEDIUM to loc.t("difficultyMedium"),
-                Difficulty.HARD to loc.t("difficultyHard"),
-                Difficulty.INFINITE to loc.t("difficultyInfinite")
+                Difficulty.HARD to loc.t("difficultyHard")
             )
             options.forEach { (diff, label) ->
                 val isSelected = diff == selected
@@ -129,15 +129,6 @@ private fun DifficultyPicker(loc: Localization, selected: Difficulty, onChange: 
                     )
                 }
             }
-        }
-        val bestLevel = LeaderboardStore.getInfiniteBestLevel(LocalContext.current)
-        if (bestLevel > 0) {
-            Spacer(Modifier.height(6.dp))
-            Text(
-                loc.t("infiniteBestLabel").replace("{level}", "$bestLevel"),
-                color = Theme.textFaint,
-                fontSize = 11.sp
-            )
         }
     }
 }

@@ -123,6 +123,22 @@ fun buildInfiniteLayout(level: Int): List<BoardPosition> {
     return positions
 }
 
+/**
+ * Levels mode (formerly "Infinite") is capped at a fixed run instead of growing forever, so
+ * it reads as a finite ladder of objectives rather than an endless mode. The same procedural
+ * board growth (buildInfiniteLayout) still drives the difficulty curve; only the ceiling and
+ * the tier labels shown in level select are new.
+ */
+const val LEVELS_MAX_LEVEL = 15
+
+enum class LevelTier(val range: IntRange) {
+    EASY(1..5), MEDIUM(6..10), HARD(11..15);
+
+    companion object {
+        fun of(level: Int): LevelTier = values().firstOrNull { it.range.contains(level) } ?: HARD
+    }
+}
+
 enum class Difficulty { EASY, MEDIUM, HARD, INFINITE }
 
 val LAYOUTS: Map<Difficulty, List<BoardPosition>> = mapOf(
