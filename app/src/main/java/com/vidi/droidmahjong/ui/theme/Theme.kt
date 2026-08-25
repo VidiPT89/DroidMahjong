@@ -29,7 +29,9 @@ object Theme {
     val dragonGreen = Color(0xFF1F7A4D)
     val bonusPink = Color(0xFFD1477A)
     val bonusBlue = Color(0xFF1D5FA8)
-    val tileFace = Color(0xFFF5F0E0)
+    val tileFace = Color(0xFFFEFAF0)
     val tileFaceShade = Color(0xFFE0D9C7)
     val tileEdge = Color(0xFF8C8066)
+    val tileHighlight = Color(0x8CFFFFFF)
+    val tileRiser = Color(0xFFA8946A)
 }

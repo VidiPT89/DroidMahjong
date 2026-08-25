@@ -90,6 +90,13 @@ fun TileView(
                 translationY = liftY
                 alpha = dealtAnim
             }
+            // Base "riser" layer, offset down, gives the tile a sense of physical thickness.
+            .shadow(
+                elevation = if (isSelected) 8.dp else 5.dp,
+                shape = RoundedCornerShape(6.dp),
+                ambientColor = Theme.tileRiser,
+                spotColor = Theme.tileRiser
+            )
             .shadow(
                 elevation = if (isSelected || isHinted) 10.dp else 2.dp,
                 shape = RoundedCornerShape(6.dp),
@@ -98,6 +105,14 @@ fun TileView(
             )
             .background(
                 Brush.verticalGradient(listOf(Theme.tileFace, Theme.tileFaceShade)),
+                RoundedCornerShape(6.dp)
+            )
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(Theme.tileHighlight, Theme.tileHighlight.copy(alpha = 0f)),
+                    center = Offset(BoardGeometry.TILE_W.dp.value * 0.28f, BoardGeometry.TILE_H.dp.value * 0.15f),
+                    radius = BoardGeometry.TILE_W.dp.value * 0.9f
+                ),
                 RoundedCornerShape(6.dp)
             )
             .border(borderWidth, borderColor, RoundedCornerShape(6.dp))
